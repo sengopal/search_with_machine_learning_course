@@ -1,0 +1,1 @@
+ltr-end-to-end.sh /Users/sengopal/build/my-git/search_with_machine_learning_course week1 /Users/sengopal/build/my-git/search_with_machine_learning_course/ltr_output /Users/sengopal/build/my-git/search_with_machine_learning_course/datasets/train.csv --synthesize quantiles run at  Sun Jun 26 12:30:02 PDT 2022

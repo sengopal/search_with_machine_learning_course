@@ -1,0 +1,9 @@
+0	na	q
+1	name_match	q
+2	name_phrase_match	q
+3	customerReviewAverage	q
+4	customerReviewCount	q
+5	shortDescription_match	q
+6	longDescription_match	q
+7	artistName_match	q
+8	click_prior	q

@@ -5,10 +5,10 @@ usage()
   exit 2
 }
 
-SOURCE_DIR="/workspace/search_with_machine_learning_course"
+SOURCE_DIR="/Users/sengopal/build/my-git/search_with_machine_learning_course"
 WEEK="week1"
-OUTPUT_DIR="/workspace/ltr_output"
-ALL_CLICKS_FILE="/workspace/datasets/train.csv"
+OUTPUT_DIR="/Users/sengopal/build/my-git/search_with_machine_learning_course/ltr_output"
+ALL_CLICKS_FILE="/Users/sengopal/build/my-git/search_with_machine_learning_course/datasets/train.csv"
 SPLIT_TRAIN_ROWS=1000000
 SPLIT_TEST_ROWS=1000000
 NUM_TEST_QUERIES=100 # the number of test queries to run
