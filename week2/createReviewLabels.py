@@ -1,14 +1,19 @@
 import os
 import argparse
 from pathlib import Path
+from nltk.stem import PorterStemmer
+from nltk import word_tokenize
 
 def transform_training_data(title, comment):
     # IMPLEMENT
-    return title + ' ' + comment
-
+    porter = PorterStemmer()
+    title_tokens = [porter.stem(word) for word in word_tokenize(title)]
+    comment_tokens = [porter.stem(word) for word in word_tokenize(comment)]
+    title_tokens += comment_tokens
+    return " ".join(title_tokens)
 
 # Directory for review data
-directory = r'/workspace/datasets/product_data/reviews/'
+directory = r'/Users/sengopal/build/my-git/search_with_machine_learning_course/datasets/product_data/reviews'
 parser = argparse.ArgumentParser(description='Process some integers.')
 general = parser.add_argument_group("general")
 general.add_argument("--input", default=directory,  help="The directory containing reviews")

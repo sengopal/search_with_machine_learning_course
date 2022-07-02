@@ -49,7 +49,7 @@ def create_prior_queries(doc_ids, doc_id_weights,
 
 
 # Hardcoded query here.  Better to use search templates or other query config.
-def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
+def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None,use_synonyms=False):
     query_obj = {
         'size': size,
         "sort": [
@@ -70,7 +70,8 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                         "fuzziness": "1",
                                         "prefix_length": 2,
                                         # short words are often acronyms or usually not misspelled, so don't edit
-                                        "boost": 0.01
+                                        "boost": 0.01,
+                                        # "auto_generate_synonyms_phrase_query": "true"
                                     }
                                 }
                             },
@@ -89,9 +90,9 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                     "type": "phrase",
                                     "slop": "6",
                                     "minimum_should_match": "2<75%",
-                                    "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
+                                    "fields": [f"name^10", "name.hyphens^10", "shortDescription^5",
                                                "longDescription^5", "department^0.5", "sku", "manufacturer", "features",
-                                               "categoryPath", "name_synonyms"]
+                                               "categoryPath"]
                                 }
                             },
                             {
@@ -167,6 +168,19 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
             }
         }
     }
+
+    if use_synonyms:
+        synonym_match = {
+                        "match": {
+                            "name.synonyms": {
+                                "query": user_query,
+                                "operator": "OR"
+                            }
+                        }
+                    }
+
+        query_obj["query"]["function_score"]["query"]["bool"]["should"].append(synonym_match)
+
     if click_prior_query is not None and click_prior_query != "":
         query_obj["query"]["function_score"]["query"]["bool"]["should"].append({
             "query_string": {
@@ -186,16 +200,18 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc",use_synonyms=False):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
-    logging.info(query_obj)
+    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], use_synonyms=use_synonyms)
+    # logging.info(query_obj)
+    print(json.dumps(query_obj, indent=2))
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
         hits = response['hits']['hits']
-        print(json.dumps(response, indent=2))
+        # print(json.dumps(response, indent=2))
+        print(f"result_count:{response['hits']['total']['value']}")
 
 
 if __name__ == "__main__":
@@ -212,6 +228,9 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
+    general.add_argument('--synonyms', default="False",
+                         help='If set as 1, uses the “name.synonyms” field instead of “name”. All other values will be ignored')
+
 
     args = parser.parse_args()
 
@@ -239,13 +258,19 @@ if __name__ == "__main__":
 
     )
     index_name = args.index
+    use_synonyms = True if args.synonyms=="True" else False
+
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
     print(query_prompt)
-    for line in fileinput.input():
-        query = line.rstrip()
+    query = ""
+    while query != "Exit":
+        query = input()
+        query = query.rstrip()
         if query == "Exit":
             break
-        search(client=opensearch, user_query=query, index=index_name)
+
+        print(f"use_synonyms:{use_synonyms}")
+        search(client=opensearch, user_query=query, index=index_name, use_synonyms=use_synonyms)
 
         print(query_prompt)
 

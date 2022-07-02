@@ -2,6 +2,10 @@
   "settings": {
     "analysis": {
       "analyzer": {
+        "synonym": {
+          "tokenizer": "whitespace",
+          "filter": [ "lowercase","stemmer", "synonym_filter" ]
+        },
         "smarter_hyphens": {
           "tokenizer": "smarter_hyphens_tokenizer",
           "filter": [
@@ -20,6 +24,10 @@
         }
       },
       "filter": {
+        "synonym_filter": {
+          "type": "synonym",
+          "synonyms_path": "synonyms.csv"
+        },
         "smarter_hyphens_filter": {
           "type": "word_delimiter_graph",
           "catenate_words": true,
@@ -241,6 +249,10 @@
           "keyword": {
             "type": "keyword",
             "ignore_above": 2048
+          },
+          "synonyms": {
+            "type": "text",
+            "analyzer": "synonym"
           },
           "hyphens": {
             "type": "text",

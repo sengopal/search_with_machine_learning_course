@@ -61,23 +61,23 @@ if [ "$ANNOTATE" != "--annotate" ]; then
     fi
   fi
 
-  if [ -f $QUERIES_JSON_FILE ]; then
-    echo ""
-    echo " Query file: $QUERIES_JSON_FILE"
-    curl -k -X PUT -u admin  "https://localhost:9200/bbuy_queries" -H 'Content-Type: application/json' -d "@$QUERIES_JSON_FILE"
-    if [ $? -ne 0 ] ; then
-      echo "Failed to create index with settings of $QUERIES_JSON_FILE"
-      exit 2
-    fi
-    if [ -f index_queries.py ]; then
-      echo "Indexing queries data and writing logs to $LOGS_DIR/index_queries.log"
-      nohup python index_queries.py -s "$DATASETS_DIR/train.csv" > "$LOGS_DIR/index_queries.log" &
-      if [ $? -ne 0 ] ; then
-        echo "Failed to index queries"
-        exit 2
-      fi
-    fi
-  fi
+#  if [ -f $QUERIES_JSON_FILE ]; then
+#    echo ""
+#    echo " Query file: $QUERIES_JSON_FILE"
+#    curl -k -X PUT -u admin  "https://localhost:9200/bbuy_queries" -H 'Content-Type: application/json' -d "@$QUERIES_JSON_FILE"
+#    if [ $? -ne 0 ] ; then
+#      echo "Failed to create index with settings of $QUERIES_JSON_FILE"
+#      exit 2
+#    fi
+#    if [ -f index_queries.py ]; then
+#      echo "Indexing queries data and writing logs to $LOGS_DIR/index_queries.log"
+#      nohup python index_queries.py -s "$DATASETS_DIR/train.csv" > "$LOGS_DIR/index_queries.log" &
+#      if [ $? -ne 0 ] ; then
+#        echo "Failed to index queries"
+#        exit 2
+#      fi
+#    fi
+#  fi
 fi
 
 if [ "$ANNOTATE" == "--annotate" ]; then
@@ -100,6 +100,3 @@ if [ "$ANNOTATE" == "--annotate" ]; then
     fi
   fi
 fi
-
-
-
