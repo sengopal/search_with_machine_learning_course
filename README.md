@@ -1,6 +1,41 @@
 # Search with Machine Learning
 The following readme notates the project work and relevant documentation for project submissions. The original README from the forked project is available [here](Original-README.md).
 
+## Week 3
+The following are the project assessment questions and responses.
+
+
+### Project Assessment
+
+To assess your project work, you should be able to answer the following questions:
+
+#### For query classification
+
+1.How many unique categories did you see in your rolled up training data when you set the minimum number of queries per category to 1000?   
+**388**
+
+2. How many unique categories did you see in your rolled up training data when you set the minimum number of queries per category to 10000?  
+**70**
+
+3. What were the best values you achieved for R@1, R@2, and R@3? You should have tried at least a few different models, varying the minimum number of queries per category, as well as trying different fastText parameters or query normalization. Report at least 2 of your runs.  
+
+|                      Model                       |           Metrics            |
+|:------------------------------------------------:|:----------------------------:|
+|  threshold=1000; lr=0.4, epoch=25, wordNgrams=1  | R@1=0.52, R@2=0.65, R@3=0.71 |
+| threshold=1000; lr=0.5, epoch=100, wordNgrams=3  | R@1=0.52, R@2=0.65, R@3=0.71 |
+| threshold=10000; lr=0.6, epoch=100, wordNgrams=3 | R@1=0.58, R@2=0.72, R@3=0.78 |
+| threshold=10000; lr=0.5, epoch=100, wordNgrams=3 | R@1=0.60, R@2=0.74, R@3=0.80 |
+| threshold=10000; lr=0.3, epoch=25, wordNgrams=3  | R@1=0.61, R@2=0.75, R@3=0.81 |
+
+#### For integrating query classification with search
+
+1. Give 2 or 3 examples of queries where you saw a dramatic positive change in the results because of filtering. Make sure to include the classifier output for those queries.
+
+
+
+2. Give 2 or 3 examples of queries where filtering hurt the results, either because the classifier was wrong or for some other reason. Again, include the classifier output for those queries.
+
+
 ## Week 2
 The following are the project assessment questions and responses.
 

@@ -7,6 +7,10 @@ week2/*.bin
 week2/*.test
 week2/*.train
 
+# week3 data files
+week3/*.bin
+week3/*.txt
+week3/min10000_*.txt
 
 data/computer_products*
 data/pruned_products*
@@ -154,3 +158,4 @@ logs/*
 *.csv
 
 .DS_Store
+/week3/min10000_labeled_query_training_data_large.txt
