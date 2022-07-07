@@ -11,13 +11,12 @@ To assess your project work, you should be able to answer the following question
 
 #### For query classification
 
-1.How many unique categories did you see in your rolled up training data when you set the minimum number of queries per category to 1000?   
+1. How many unique categories did you see in your rolled up training data when you set the minimum number of queries per category to 1000?   
 **388**
-
 2. How many unique categories did you see in your rolled up training data when you set the minimum number of queries per category to 10000?  
 **70**
 
-3. What were the best values you achieved for R@1, R@2, and R@3? You should have tried at least a few different models, varying the minimum number of queries per category, as well as trying different fastText parameters or query normalization. Report at least 2 of your runs.  
+3. What were the best values you achieved for R@1, R@2, and R@3? You should have tried at least a few different models, varying the minimum number of queries per category, as well as trying different fastText parameters or query normalization. Report at least 2 of your runs.    
 
 |                      Model                       |           Metrics            |
 |:------------------------------------------------:|:----------------------------:|
@@ -30,10 +29,10 @@ To assess your project work, you should be able to answer the following question
 #### For integrating query classification with search
 
 1. Give 2 or 3 examples of queries where you saw a dramatic positive change in the results because of filtering. Make sure to include the classifier output for those queries.
-
-
+![cat-filter-better-results](week3/cat-filter-better-results.png)
 
 2. Give 2 or 3 examples of queries where filtering hurt the results, either because the classifier was wrong or for some other reason. Again, include the classifier output for those queries.
+![cat-filter-worse-results](week3/cat-filter-worse-results.png)
 
 
 ## Week 2
@@ -118,8 +117,6 @@ The notebook [project2_level4_reviews_notebook](week2/project2_level4_reviews_no
 5. **What else did you try and learn?**  
    Various tokenization and stemming processes. Utilization of hyperparameters for fasttext. Tried to play with hyper parameter optimizations techniques.
        
-
-
 
 ## Week 1
 The analysis of different experiments using varying weights for main and rescoring queries and with different featuresets is available below.
