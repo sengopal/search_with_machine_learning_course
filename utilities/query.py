@@ -13,12 +13,16 @@ import fileinput
 import logging
 import numpy as np
 import fasttext
+from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
 
 cat_model = fasttext.load_model("../week3/cat_classifier_v5.bin")
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+MAX_RETRIEVAL_SIZE = 10000
 
 # expects clicks and impressions to be in the row
 def create_prior_queries_from_group(
@@ -51,8 +55,37 @@ def create_prior_queries(doc_ids, doc_id_weights,
     return click_prior_query
 
 
-# Hardcoded query here.  Better to use search templates or other query config.
-def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None,use_synonyms=False,use_cat_filter=False):
+def create_vector_query(user_query, size=10, source=None,use_cat_filter=False):
+    query_embedding = model.encode([user_query])
+    query_obj = {
+        "size": size,
+        "query": {
+            "knn": {
+                "embedding": {
+                    "vector": query_embedding[0],
+                    "k": size
+                }
+            }
+        }
+    }
+
+    if use_cat_filter:
+        cats_list = get_cat_preds(user_query)
+        if len(cats_list) > 0:
+            cats_filter = {
+                "terms": {
+                    "categoryPathIds": cats_list
+                }
+            }
+            query_obj["post_filter"] = cats_filter
+
+    if source is not None:  # otherwise use the default and retrieve all source
+        query_obj["_source"] = source
+
+    return query_obj
+
+
+def get_cat_preds(user_query):
     pred = cat_model.predict(user_query, k=20)
     scores = pred[1]
     # pred_cats = max(1, np.argmin(scores > 0.1)) ## use only cats with score more thatn 0.25
@@ -63,6 +96,12 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     category = pred[0][0:pred_cats]
     cats_list = [cat.replace('__label__', '') for cat in category]
     print(f"pred cat list: {cats_list}")
+    return cats_list
+
+
+# Hardcoded query here.  Better to use search templates or other query config.
+def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None,use_synonyms=False,use_cat_filter=False):
+    cats_list = get_cat_preds(user_query)
 
     query_obj = {
         'size': size,
@@ -222,14 +261,30 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc",use_synonyms=False,use_cat_filter=False):
+def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc",use_synonyms=False,use_cat_filter=False,use_vector=False):
     #### W3: classify the query
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], use_synonyms=use_synonyms,use_cat_filter=use_cat_filter)
+    # Current result size expected
+    size = 10
+
+    if use_vector:
+        query_obj = create_vector_query(user_query,size=size, use_cat_filter=use_cat_filter)
+    else:
+        query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"], use_synonyms=use_synonyms, use_cat_filter=use_cat_filter)
     # logging.info(query_obj)
     # print(json.dumps(query_obj, indent=2))
     response = client.search(query_obj, index=index)
+
+    # Filtering Vector Search Results and retrying with a larger size
+    response_cnt = len(response['hits']['hits'])
+    if response_cnt == 0:
+        while response_cnt == 0 and size < MAX_RETRIEVAL_SIZE:
+            size = size * 2
+            query_obj = create_vector_query(user_query, size=size, use_cat_filter=use_cat_filter)
+            response = client.search(query_obj, index=index)
+            response_cnt = len(response['hits']['hits'])
+
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
         hits = response['hits']['hits']
         # print(json.dumps(response, indent=2))
@@ -257,6 +312,8 @@ if __name__ == "__main__":
                          help='If set as True, uses the “name.synonyms” field instead of “name”. All other values will be ignored')
     general.add_argument('--catFilter', default="False",
                          help='If set as True, uses the Category Filter. All other values will be ignored')
+    general.add_argument('--vector', default="False",
+                         help='If set as True, uses the Vector embedding query. All other values will be ignored')
 
     args = parser.parse_args()
 
@@ -286,6 +343,7 @@ if __name__ == "__main__":
     index_name = args.index
     use_synonyms = True if args.synonyms=="True" else False
     use_cat_filter = True if args.catFilter=="True" else False
+    use_vector = True if args.vector=="True" else False
 
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
     print(query_prompt)
@@ -298,7 +356,7 @@ if __name__ == "__main__":
 
         print(f"use_synonyms:{use_synonyms}")
         print(f"use_cat_filter:{use_cat_filter}")
-        search(client=opensearch, user_query=query, index=index_name, use_synonyms=use_synonyms, use_cat_filter=use_cat_filter)
+        search(client=opensearch, user_query=query, index=index_name, use_synonyms=use_synonyms, use_cat_filter=use_cat_filter, use_vector=use_vector)
 
         print(query_prompt)
 
