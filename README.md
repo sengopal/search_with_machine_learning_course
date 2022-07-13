@@ -1,9 +1,18 @@
 # Search with Machine Learning
 The following readme notates the project work and relevant documentation for project submissions. The original README from the forked project is available [here](Original-README.md).
 
+## Week 4 (Extra Credit)
+**What are you the most proud of over the past 4 weeks?**    
+This was an excellent survey of the search techniques from the fundamentals of LTR and the modern usage of ML techniques such as kNN and vector embeddings for retrieval. Its a truly proud moment that all of these learnings were immediately applied to review their results and even more impressive is its effect on our day-to-day work as well.  
+
+### Project 4 Tasks
+1. ANN Index created in Opensearch using the changes in `week4/conf/bbuy_products.json` and `week4/utilities/index_products.py`
+2. Old index deleted and newly created using `./index-data.sh -r -p /workspace/search_with_machine_learning_course/week4/conf/bbuy_products.json`
+3. `query.py` enhanced to use `--vector` flag to utilize embeddings for search
+4. `post_filter` usage would reduce the recall and retry mechanism added to support additional recall until the result count is reached.
+
 ## Week 3
 The following are the project assessment questions and responses.
-
 
 ### Project Assessment
 
